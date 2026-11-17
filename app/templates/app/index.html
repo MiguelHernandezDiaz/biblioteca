@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión de Biblioteca</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Barra Superior -->
+  <header class="border-b border-slate-800 bg-slate-900/90 px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <h1 class="text-lg font-bold text-emerald-400">Biblioteca Central</h1>
+      <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+        Django + PostgreSQL
+      </span>
+    </div>
+    <div id="user-bar" class="flex items-center gap-4 text-sm"></div>
+  </header>
+
+  <!-- Notificación en pantalla -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-lg border"></div>
+
+  <main class="max-w-6xl w-full mx-auto p-6 flex-1">
+
+    <!-- PANTALLA DE LOGIN -->
+    <section id="login-section" class="max-w-md mx-auto mt-10 bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-4">
+      <div>
+        <h2 class="text-xl font-bold text-white">Iniciar Sesión</h2>
+        <p class="text-xs text-slate-400 mt-1">Ingresa tus credenciales registradas en PostgreSQL.</p>
+      </div>
+
+      <form onsubmit="iniciarSesion(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Correo electrónico</label>
+          <input id="login-email" type="email" required placeholder="usuario@biblioteca.local"
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Contraseña</label>
+          <input id="login-password" type="password" required placeholder="••••••••"
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+        </div>
+        <button type="submit"
+          class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+          Entrar al Sistema
+        </button>
+      </form>
+      <p id="login-error" class="text-xs text-rose-400 hidden"></p>
+    </section>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <section id="app-section" class="hidden space-y-6">
+
+      <!-- Navegación por Pestañas -->
+      <nav class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
+        <button onclick="cambiarPestana('catalogo')" id="btn-tab-catalogo"
+          class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white">
+          Catálogo Disponible
+        </button>
+        <button onclick="cambiarPestana('prestamos')" id="btn-tab-prestamos"
+          class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 text-slate-300">
+          Préstamos Activos
+        </button>
+        <button onclick="cambiarPestana('admin')" id="btn-tab-admin"
+          class="tab-btn hidden px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 text-slate-300">
+          Administración
+        </button>
+        <button onclick="cambiarPestana('inspector')" id="btn-tab-inspector"
+          class="tab-btn hidden px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 text-slate-300">
+          PostgreSQL &amp; Tablas
+        </button>
+      </nav>
+
+      <!-- VISTA 1: CATÁLOGO DE LIBROS DISPONIBLES -->
+      <div id="vista-catalogo" class="space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold">Libros Disponibles para Préstamo</h2>
+          <button onclick="cargarLibros()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700">
+            Actualizar
+          </button>
+        </div>
+        <div id="libros-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- VISTA 2: PRÉSTAMOS ACTIVOS -->
+      <div id="vista-prestamos" class="hidden space-y-4">
+        <h2 class="text-lg font-bold">Préstamos Activos</h2>
+        <div id="prestamos-lista" class="space-y-3"></div>
+      </div>
+
+      <!-- VISTA 3: ADMINISTRACIÓN (SOLO ADMIN) -->
+      <div id="vista-admin" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Crear Libro -->
+        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+          <h3 class="font-bold text-emerald-400">Registrar Nuevo Libro</h3>
+          <form onsubmit="crearLibro(event)" class="space-y-3 text-sm">
+            <input id="libro-titulo" type="text" required placeholder="Título del libro"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <input id="libro-autor" type="text" required placeholder="Autor"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <input id="libro-isbn" type="text" required placeholder="ISBN (ej. 9780132350884)"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <input id="libro-copias" type="number" min="1" value="1" required placeholder="Copias totales"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded font-semibold">
+              Guardar Libro
+            </button>
+          </form>
+        </div>
+
+        <!-- Crear Usuario -->
+        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+          <h3 class="font-bold text-cyan-400">Registrar Nuevo Usuario</h3>
+          <form onsubmit="crearUsuario(event)" class="space-y-3 text-sm">
+            <input id="usr-nombre" type="text" required placeholder="Nombre completo"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <input id="usr-email" type="email" required placeholder="correo@ejemplo.com"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <input id="usr-password" type="password" required placeholder="Contraseña"
+              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <select id="usr-rol" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+              <option value="lector">Lector</option>
+              <option value="admin">Administrador</option>
+            </select>
+            <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded font-semibold">
+              Crear Usuario
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- VISTA 4: INSPECTOR DE TABLAS POSTGRESQL (SOLO ADMIN) -->
+      <div id="vista-inspector" class="hidden space-y-4">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-cyan-400">Inspector de PostgreSQL</h2>
+            <p class="text-xs text-slate-400">Visualización directa de las 3 tablas de negocio.</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="seleccionarTabla('usuarios')" id="tbl-btn-usuarios"
+              class="tbl-btn px-3 py-1.5 rounded text-xs font-mono bg-cyan-600 text-white">usuarios</button>
+            <button onclick="seleccionarTabla('libros')" id="tbl-btn-libros"
+              class="tbl-btn px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300">libros</button>
+            <button onclick="seleccionarTabla('prestamos')" id="tbl-btn-prestamos"
+              class="tbl-btn px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300">prestamos</button>
+            <button onclick="cargarInspector()"
+              class="px-3 py-1.5 rounded text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700">Refrescar</button>
+          </div>
+        </div>
+
+        <input id="inspector-filtro" type="text" oninput="renderizarTablaActual()" placeholder="Filtrar registros..."
+          class="w-full sm:w-72 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs">
+
+        <div id="inspector-tabla-box" class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto p-4"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    let usuarioActual = null;
+    let tablasCache = null;
+    let tablaActiva = 'usuarios';
+
+    function esc(texto) {
+      return String(texto ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function mostrarToast(mensaje, ok = true) {
+      const el = document.getElementById('toast');
+      el.textContent = mensaje;
+      el.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-lg border ${
+        ok ? 'bg-emerald-950 border-emerald-700 text-emerald-200' : 'bg-rose-950 border-rose-700 text-rose-200'
+      }`;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 3500);
+    }
+
+    async function api(url, opciones = {}) {
+      const res = await fetch(url, {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(opciones.headers || {}) },
+        ...opciones
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    async function verificarSesionInicial() {
+      const { ok, data } = await api('/api/auth/me/');
+      if (ok && data.authenticated) {
+        entrarAlSistema(data.user);
+      }
+    }
+
+    async function iniciarSesion(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const errBox = document.getElementById('login-error');
+      errBox.classList.add('hidden');
+
+      const { ok, data } = await api('/api/auth/login/', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+
+      if (ok && data.ok) {
+        entrarAlSistema(data.user);
+      } else {
+        errBox.textContent = data.error || 'Error de autenticación';
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    function entrarAlSistema(user) {
+      usuarioActual = user;
+      document.getElementById('login-section').classList.add('hidden');
+      document.getElementById('app-section').classList.remove('hidden');
+
+      const esAdmin = user.rol === 'admin';
+      document.getElementById('btn-tab-admin').classList.toggle('hidden', !esAdmin);
+      document.getElementById('btn-tab-inspector').classList.toggle('hidden', !esAdmin);
+
+      document.getElementById('user-bar').innerHTML = `
+        <span class="text-slate-300">${esc(user.nombre)} <span class="text-xs text-emerald-400">(${esc(user.rol)})</span></span>
+        <button onclick="cerrarSesion()" class="text-xs text-rose-400 hover:underline">Salir</button>
+      `;
+
+      cambiarPestana('catalogo');
+    }
+
+    async function cerrarSesion() {
+      await api('/api/auth/logout/', { method: 'POST' });
+      usuarioActual = null;
+      document.getElementById('login-section').classList.remove('hidden');
+      document.getElementById('app-section').classList.add('hidden');
+      document.getElementById('user-bar').innerHTML = '';
+      document.getElementById('login-password').value = '';
+    }
+
+    function cambiarPestana(nombre) {
+      ['catalogo', 'prestamos', 'admin', 'inspector'].forEach(p => {
+        document.getElementById(`vista-${p}`).classList.toggle('hidden', p !== nombre);
+        const btn = document.getElementById(`btn-tab-${p}`);
+        if (p === nombre) {
+          btn.classList.remove('bg-slate-800', 'text-slate-300');
+          btn.classList.add('bg-emerald-600', 'text-white');
+        } else {
+          btn.classList.remove('bg-emerald-600', 'text-white');
+          btn.classList.add('bg-slate-800', 'text-slate-300');
+        }
+      });
+
+      if (nombre === 'catalogo') cargarLibros();
+      if (nombre === 'prestamos') cargarPrestamos();
+      if (nombre === 'inspector') cargarInspector();
+    }
+
+    async function cargarLibros() {
+      const { ok, data } = await api('/api/libros/');
+      const grid = document.getElementById('libros-grid');
+      if (!ok) return;
+
+      if (data.length === 0) {
+        grid.innerHTML = `<p class="text-sm text-slate-400 col-span-full">No hay libros disponibles en este momento.</p>`;
+        return;
+      }
+
+      grid.innerHTML = data.map(l => `
+        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col justify-between gap-4">
+          <div>
+            <h3 class="font-bold text-white">${esc(l.titulo)}</h3>
+            <p class="text-xs text-slate-400 mt-1">${esc(l.autor)}</p>
+            <p class="text-xs text-slate-500 font-mono mt-1">ISBN: ${esc(l.isbn)}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
+            <span class="text-xs text-emerald-400 font-medium">Disponible</span>
+            <button onclick="prestarLibro(${l.id})"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition">
+              Solicitar Préstamo
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function prestarLibro(libroId) {
+      const { ok, data } = await api('/api/prestamos/', {
+        method: 'POST',
+        body: JSON.stringify({ libro_id: libroId, dias: 7 })
+      });
+      if (ok) {
+        mostrarToast('Préstamo registrado con éxito.');
+        cargarLibros();
+      } else {
+        mostrarToast(data.error || 'No se pudo procesar el préstamo.', false);
+      }
+    }
+
+    async function cargarPrestamos() {
+      const { ok, data } = await api('/api/prestamos/');
+      const lista = document.getElementById('prestamos-lista');
+      if (!ok) return;
+
+      if (data.length === 0) {
+        lista.innerHTML = `<p class="text-sm text-slate-400">No hay préstamos activos.</p>`;
+        return;
+      }
+
+      lista.innerHTML = data.map(p => `
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <p class="font-semibold text-white text-sm">${esc(p.libro_titulo)}</p>
+            <p class="text-xs text-slate-400">Lector: ${esc(p.usuario_nombre)} · Límite: ${new Date(p.fecha_limite).toLocaleDateString()}</p>
+          </div>
+          <button onclick="devolverPrestamo(${p.id})"
+            class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3 py-1.5 rounded-lg">
+            Devolver Libro
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function devolverPrestamo(id) {
+      const { ok, data } = await api(`/api/prestamos/${id}/devolver/`, { method: 'POST' });
+      if (ok) {
+        mostrarToast('Libro devuelto al inventario.');
+        cargarPrestamos();
+      } else {
+        mostrarToast(data.error || 'Error al devolver.', false);
+      }
+    }
+
+    async function crearLibro(e) {
+      e.preventDefault();
+      const payload = {
+        titulo: document.getElementById('libro-titulo').value,
+        autor: document.getElementById('libro-autor').value,
+        isbn: document.getElementById('libro-isbn').value,
+        copias_totales: Number(document.getElementById('libro-copias').value)
+      };
+      const { ok, data } = await api('/api/libros/', { method: 'POST', body: JSON.stringify(payload) });
+      if (ok) {
+        mostrarToast('Libro registrado correctamente.');
+        e.target.reset();
+      } else {
+        mostrarToast(JSON.stringify(data), false);
+      }
+    }
+
+    async function crearUsuario(e) {
+      e.preventDefault();
+      const payload = {
+        nombre: document.getElementById('usr-nombre').value,
+        email: document.getElementById('usr-email').value,
+        password: document.getElementById('usr-password').value,
+        rol: document.getElementById('usr-rol').value
+      };
+      const { ok, data } = await api('/api/usuarios/', { method: 'POST', body: JSON.stringify(payload) });
+      if (ok) {
+        mostrarToast('Usuario creado correctamente.');
+        e.target.reset();
+      } else {
+        mostrarToast(JSON.stringify(data), false);
+      }
+    }
+
+    async function cargarInspector() {
+      const { ok, data } = await api('/api/sistema/tablas/');
+      if (!ok) {
+        mostrarToast('No autorizado para inspeccionar PostgreSQL.', false);
+        return;
+      }
+      tablasCache = data.tablas;
+      renderizarTablaActual();
+    }
+
+    function seleccionarTabla(nombre) {
+      tablaActiva = nombre;
+      ['usuarios', 'libros', 'prestamos'].forEach(t => {
+        const b = document.getElementById(`tbl-btn-${t}`);
+        b.className = t === nombre
+          ? 'tbl-btn px-3 py-1.5 rounded text-xs font-mono bg-cyan-600 text-white'
+          : 'tbl-btn px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300';
+      });
+      renderizarTablaActual();
+    }
+
+    function renderizarTablaActual() {
+      if (!tablasCache) return;
+      const box = document.getElementById('inspector-tabla-box');
+      const filtro = document.getElementById('inspector-filtro').value.toLowerCase();
+      const tabla = tablasCache[tablaActiva];
+      const filas = tabla.filas.filter(f =>
+        !filtro || Object.values(f).some(v => String(v).toLowerCase().includes(filtro))
+      );
+
+      if (filas.length === 0) {
+        box.innerHTML = `<p class="text-xs text-slate-400">Sin filas que mostrar en "${esc(tablaActiva)}".</p>`;
+        return;
+      }
+
+      const columnas = Object.keys(filas[0]);
+      box.innerHTML = `
+        <div class="text-xs text-slate-400 mb-2 font-mono">Mostrando ${filas.length} de ${tabla.total} registros en <b>${esc(tablaActiva)}</b></div>
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="border-b border-slate-800 text-slate-400 uppercase">
+            <tr>${columnas.map(c => `<th class="p-2">${esc(c)}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${filas.map(f => `
+              <tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                ${columnas.map(c => `<td class="p-2">${esc(f[c])}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    verificarSesionInicial();
+  </script>
+</body>
+</html>
