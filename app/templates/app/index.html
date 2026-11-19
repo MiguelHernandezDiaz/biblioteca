@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestión de Biblioteca</title>
+  <title>Biblioteca</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -11,10 +11,7 @@
   <!-- Barra Superior -->
   <header class="border-b border-slate-800 bg-slate-900/90 px-6 py-4 flex justify-between items-center sticky top-0 z-40">
     <div class="flex items-center gap-3">
-      <h1 class="text-lg font-bold text-emerald-400">Biblioteca Central</h1>
-      <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-        Django + PostgreSQL
-      </span>
+      <h1 class="text-lg font-bold text-emerald-400">Biblioteca</h1>
     </div>
     <div id="user-bar" class="flex items-center gap-4 text-sm"></div>
   </header>
@@ -24,29 +21,79 @@
 
   <main class="max-w-6xl w-full mx-auto p-6 flex-1">
 
-    <!-- PANTALLA DE LOGIN -->
-    <section id="login-section" class="max-w-md mx-auto mt-10 bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-4">
-      <div>
-        <h2 class="text-xl font-bold text-white">Iniciar Sesión</h2>
-        <p class="text-xs text-slate-400 mt-1">Ingresa tus credenciales registradas en PostgreSQL.</p>
+    <!-- PANTALLA DE ACCESO (LOGIN + REGISTRO PROPIO) -->
+    <section id="login-section" class="max-w-md mx-auto mt-10 bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-5">
+      <div class="grid grid-cols-2 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs font-semibold">
+        <button type="button" id="auth-tab-login" onclick="cambiarModoAuth('login')"
+          class="py-2 rounded-md bg-emerald-600 text-white transition">
+          Iniciar Sesión
+        </button>
+        <button type="button" id="auth-tab-register" onclick="cambiarModoAuth('register')"
+          class="py-2 rounded-md text-slate-400 hover:text-white transition">
+          Crear Cuenta
+        </button>
       </div>
 
-      <form onsubmit="iniciarSesion(event)" class="space-y-4">
+      <!-- Formulario Login -->
+      <div id="box-login" class="space-y-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Correo electrónico</label>
-          <input id="login-email" type="email" required placeholder="usuario@biblioteca.local"
-            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+          <h2 class="text-xl font-bold text-white">Bienvenido</h2>
+          <p class="text-xs text-slate-400 mt-1">Ingresa con tu correo y contraseña registrados.</p>
         </div>
+
+        <form onsubmit="iniciarSesion(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Correo electrónico</label>
+            <input id="login-email" type="email" required placeholder="usuario@biblioteca.local"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Contraseña</label>
+            <input id="login-password" type="password" required placeholder="••••••••"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+          <button type="submit"
+            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+            Entrar al Sistema
+          </button>
+        </form>
+      </div>
+
+      <!-- Formulario Registro Público de Lector -->
+      <div id="box-register" class="hidden space-y-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Contraseña</label>
-          <input id="login-password" type="password" required placeholder="••••••••"
-            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+          <h2 class="text-xl font-bold text-white">Crear Perfil de Lector</h2>
+          <p class="text-xs text-slate-400 mt-1">Registra tu propio correo y contraseña para solicitar libros.</p>
         </div>
-        <button type="submit"
-          class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-          Entrar al Sistema
-        </button>
-      </form>
+
+        <form onsubmit="registrarCuenta(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Nombre completo</label>
+            <input id="reg-nombre" type="text" required placeholder="Ej. Ana López"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Correo electrónico</label>
+            <input id="reg-email" type="email" required placeholder="tu.correo@ejemplo.com"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Contraseña</label>
+            <input id="reg-password" type="password" required minlength="4" placeholder="Mínimo 4 caracteres"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Confirmar contraseña</label>
+            <input id="reg-password-confirm" type="password" required minlength="4" placeholder="Repite tu contraseña"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+          </div>
+          <button type="submit"
+            class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+            Registrarme y Entrar
+          </button>
+        </form>
+      </div>
+
       <p id="login-error" class="text-xs text-rose-400 hidden"></p>
     </section>
 
@@ -69,7 +116,7 @@
         </button>
         <button onclick="cambiarPestana('inspector')" id="btn-tab-inspector"
           class="tab-btn hidden px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 text-slate-300">
-          PostgreSQL &amp; Tablas
+          Inspector
         </button>
       </nav>
 
@@ -91,43 +138,94 @@
       </div>
 
       <!-- VISTA 3: ADMINISTRACIÓN (SOLO ADMIN) -->
-      <div id="vista-admin" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Crear Libro -->
-        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
-          <h3 class="font-bold text-emerald-400">Registrar Nuevo Libro</h3>
-          <form onsubmit="crearLibro(event)" class="space-y-3 text-sm">
-            <input id="libro-titulo" type="text" required placeholder="Título del libro"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <input id="libro-autor" type="text" required placeholder="Autor"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <input id="libro-isbn" type="text" required placeholder="ISBN (ej. 9780132350884)"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <input id="libro-copias" type="number" min="1" value="1" required placeholder="Copias totales"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded font-semibold">
-              Guardar Libro
-            </button>
-          </form>
+      <div id="vista-admin" class="hidden space-y-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Crear Libro + Open Library -->
+          <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-emerald-400">Registrar Nuevo Libro</h3>
+              <span class="text-[11px] text-slate-400 font-mono">Open Library ISBN</span>
+            </div>
+            <form onsubmit="crearLibro(event)" class="space-y-3 text-sm">
+              <div class="flex gap-2">
+                <input id="libro-isbn" type="text" required placeholder="ISBN (ej. 9780132350884)"
+                  class="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 font-mono text-xs">
+                <button type="button" onclick="buscarOpenLibrary('crear')"
+                  class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-2 rounded text-xs font-medium text-emerald-300 whitespace-nowrap">
+                  Buscar ISBN
+                </button>
+              </div>
+              <input id="libro-titulo" type="text" required placeholder="Título del libro"
+                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+              <input id="libro-autor" type="text" required placeholder="Autor"
+                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Copias totales</label>
+                  <input id="libro-copias" type="number" min="1" value="1" required
+                    class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">URL Portada (opcional)</label>
+                  <input id="libro-portada" type="url" oninput="actualizarPreviewPortada('crear')" placeholder="Automática por ISBN"
+                    class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-xs">
+                </div>
+              </div>
+              <div id="crear-portada-preview" class="hidden flex items-center gap-3 bg-slate-950 p-2.5 rounded border border-slate-800">
+                <img id="crear-portada-img" src="" alt="Vista previa" class="w-12 h-16 object-cover rounded border border-slate-700">
+                <div class="text-xs text-slate-400">
+                  <p class="text-emerald-400 font-medium">Portada vinculada</p>
+                  <p id="crear-portada-texto" class="truncate max-w-[220px] font-mono text-[11px]"></p>
+                </div>
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded font-semibold">
+                Guardar Libro
+              </button>
+            </form>
+          </div>
+
+          <!-- Crear Usuario -->
+          <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+            <h3 class="font-bold text-cyan-400">Registrar Nuevo Usuario</h3>
+            <form onsubmit="crearUsuario(event)" class="space-y-3 text-sm">
+              <input id="usr-nombre" type="text" required placeholder="Nombre completo"
+                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+              <input id="usr-email" type="email" required placeholder="correo@ejemplo.com"
+                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+              <input id="usr-password" type="password" required placeholder="Contraseña"
+                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+              <select id="usr-rol" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+                <option value="lector">Lector</option>
+                <option value="admin">Administrador</option>
+              </select>
+              <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded font-semibold">
+                Crear Usuario
+              </button>
+            </form>
+          </div>
         </div>
 
-        <!-- Crear Usuario -->
+        <!-- Gestión y Edición de Libros -->
         <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
-          <h3 class="font-bold text-cyan-400">Registrar Nuevo Usuario</h3>
-          <form onsubmit="crearUsuario(event)" class="space-y-3 text-sm">
-            <input id="usr-nombre" type="text" required placeholder="Nombre completo"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <input id="usr-email" type="email" required placeholder="correo@ejemplo.com"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <input id="usr-password" type="password" required placeholder="Contraseña"
-              class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-            <select id="usr-rol" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
-              <option value="lector">Lector</option>
-              <option value="admin">Administrador</option>
-            </select>
-            <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded font-semibold">
-              Crear Usuario
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-emerald-400">Inventario y Edición de Libros</h3>
+              <p class="text-xs text-slate-400">Modifica datos, copias, estado o portada de cualquier libro.</p>
+            </div>
+            <button onclick="cargarAdminDatos()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700">
+              Refrescar
             </button>
-          </form>
+          </div>
+          <div id="admin-libros-lista" class="overflow-x-auto"></div>
+        </div>
+
+        <!-- Gestión y Edición de Usuarios -->
+        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+          <div>
+            <h3 class="font-bold text-cyan-400">Gestión y Edición de Usuarios</h3>
+            <p class="text-xs text-slate-400">Edita nombre, correo, rol, estado activo o restablece contraseñas.</p>
+          </div>
+          <div id="admin-usuarios-lista" class="overflow-x-auto"></div>
         </div>
       </div>
 
@@ -159,15 +257,127 @@
     </section>
   </main>
 
+  <!-- MODAL EDITAR LIBRO -->
+  <div id="modal-libro" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-emerald-400">Editar Libro</h3>
+        <button onclick="cerrarModal('modal-libro')" class="text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+      <form onsubmit="guardarEdicionLibro(event)" class="space-y-3 text-sm">
+        <input type="hidden" id="edit-libro-id">
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="block text-xs text-slate-400 mb-1">ISBN</label>
+            <input id="edit-libro-isbn" type="text" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 font-mono text-xs">
+          </div>
+          <div class="flex items-end">
+            <button type="button" onclick="buscarOpenLibrary('editar')"
+              class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-2 rounded text-xs text-emerald-300">
+              Actualizar desde Open Library
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Título</label>
+          <input id="edit-libro-titulo" type="text" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Autor</label>
+          <input id="edit-libro-autor" type="text" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Copias totales</label>
+            <input id="edit-libro-totales" type="number" min="0" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Copias disponibles</label>
+            <input id="edit-libro-disponibles" type="number" min="0" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">URL de Portada</label>
+          <input id="edit-libro-portada" type="url" oninput="actualizarPreviewPortada('editar')" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-xs">
+        </div>
+        <div id="editar-portada-preview" class="hidden flex items-center gap-3 bg-slate-950 p-2 rounded border border-slate-800">
+          <img id="editar-portada-img" src="" alt="Portada" class="w-10 h-14 object-cover rounded border border-slate-700">
+          <span id="editar-portada-texto" class="text-[11px] font-mono text-slate-400 truncate"></span>
+        </div>
+        <label class="flex items-center gap-2 text-xs text-slate-300 pt-1">
+          <input id="edit-libro-activo" type="checkbox" class="rounded bg-slate-950 border-slate-700">
+          Libro activo en biblioteca
+        </label>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="cerrarModal('modal-libro')" class="px-4 py-2 rounded bg-slate-800 text-xs">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 font-semibold text-xs">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR USUARIO -->
+  <div id="modal-usuario" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-cyan-400">Editar Usuario</h3>
+        <button onclick="cerrarModal('modal-usuario')" class="text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+      <form onsubmit="guardarEdicionUsuario(event)" class="space-y-3 text-sm">
+        <input type="hidden" id="edit-usr-id">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Nombre completo</label>
+          <input id="edit-usr-nombre" type="text" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Correo electrónico</label>
+          <input id="edit-usr-email" type="email" required class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Rol</label>
+          <select id="edit-usr-rol" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+            <option value="lector">Lector</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Nueva contraseña (opcional)</label>
+          <input id="edit-usr-password" type="password" placeholder="Dejar vacío para no cambiar"
+            class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2">
+        </div>
+        <label class="flex items-center gap-2 text-xs text-slate-300 pt-1">
+          <input id="edit-usr-activo" type="checkbox" class="rounded bg-slate-950 border-slate-700">
+          Cuenta activa
+        </label>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="cerrarModal('modal-usuario')" class="px-4 py-2 rounded bg-slate-800 text-xs">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded bg-cyan-600 hover:bg-cyan-500 font-semibold text-xs">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     let usuarioActual = null;
     let tablasCache = null;
     let tablaActiva = 'usuarios';
+    let adminLibrosCache = [];
+    let adminUsuariosCache = [];
 
     function esc(texto) {
       return String(texto ?? '').replace(/[&<>"']/g, c => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[c]));
+    }
+
+    function limpiarIsbn(isbn) {
+      return String(isbn ?? '').replace(/[^0-9Xx]/g, '').toUpperCase();
+    }
+
+    function urlPortadaOpenLibrary(libro) {
+      if (libro.portada_url) return libro.portada_url;
+      const isbn = limpiarIsbn(libro.isbn);
+      return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : '';
     }
 
     function mostrarToast(mensaje, ok = true) {
@@ -188,6 +398,20 @@
       });
       const data = await res.json().catch(() => ({}));
       return { ok: res.ok, status: res.status, data };
+    }
+
+    function cambiarModoAuth(modo) {
+      const esLogin = modo === 'login';
+      document.getElementById('box-login').classList.toggle('hidden', !esLogin);
+      document.getElementById('box-register').classList.toggle('hidden', esLogin);
+      document.getElementById('login-error').classList.add('hidden');
+
+      document.getElementById('auth-tab-login').className = esLogin
+        ? 'py-2 rounded-md bg-emerald-600 text-white transition'
+        : 'py-2 rounded-md text-slate-400 hover:text-white transition';
+      document.getElementById('auth-tab-register').className = !esLogin
+        ? 'py-2 rounded-md bg-cyan-600 text-white transition'
+        : 'py-2 rounded-md text-slate-400 hover:text-white transition';
     }
 
     async function verificarSesionInicial() {
@@ -213,6 +437,36 @@
         entrarAlSistema(data.user);
       } else {
         errBox.textContent = data.error || 'Error de autenticación';
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    async function registrarCuenta(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('reg-nombre').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-password-confirm').value;
+      const errBox = document.getElementById('login-error');
+      errBox.classList.add('hidden');
+
+      if (password !== confirm) {
+        errBox.textContent = 'Las contraseñas no coinciden.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const { ok, data } = await api('/api/auth/register/', {
+        method: 'POST',
+        body: JSON.stringify({ nombre, email, password })
+      });
+
+      if (ok && data.ok) {
+        e.target.reset();
+        mostrarToast(`Bienvenido, ${data.user.nombre}. Cuenta creada con éxito.`);
+        entrarAlSistema(data.user);
+      } else {
+        errBox.textContent = data.error || 'No se pudo completar el registro.';
         errBox.classList.remove('hidden');
       }
     }
@@ -258,9 +512,11 @@
 
       if (nombre === 'catalogo') cargarLibros();
       if (nombre === 'prestamos') cargarPrestamos();
+      if (nombre === 'admin') cargarAdminDatos();
       if (nombre === 'inspector') cargarInspector();
     }
 
+    // --- CATÁLOGO CON PORTADAS DE OPEN LIBRARY ---
     async function cargarLibros() {
       const { ok, data } = await api('/api/libros/');
       const grid = document.getElementById('libros-grid');
@@ -271,22 +527,42 @@
         return;
       }
 
-      grid.innerHTML = data.map(l => `
-        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col justify-between gap-4">
-          <div>
-            <h3 class="font-bold text-white">${esc(l.titulo)}</h3>
-            <p class="text-xs text-slate-400 mt-1">${esc(l.autor)}</p>
-            <p class="text-xs text-slate-500 font-mono mt-1">ISBN: ${esc(l.isbn)}</p>
+      grid.innerHTML = data.map(l => {
+        const coverUrl = urlPortadaOpenLibrary(l);
+        return `
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between gap-4">
+            <div class="flex gap-4">
+              <div class="w-20 h-28 shrink-0 rounded-lg overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center relative">
+                ${coverUrl ? `
+                  <img src="${esc(coverUrl)}" alt="Portada de ${esc(l.titulo)}"
+                    onload="if(this.naturalWidth<=1){this.style.display='none';this.nextElementSibling.classList.remove('hidden');}"
+                    onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');"
+                    class="w-full h-full object-cover">
+                ` : ''}
+                <div class="${coverUrl ? 'hidden' : ''} flex flex-col items-center justify-center text-center p-1.5 text-slate-500">
+                  <span class="text-lg">📚</span>
+                  <span class="text-[9px] font-mono leading-tight mt-1">Sin portada</span>
+                </div>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="font-bold text-white text-sm leading-snug line-clamp-2">${esc(l.titulo)}</h3>
+                <p class="text-xs text-slate-400 mt-1 truncate">${esc(l.autor)}</p>
+                <p class="text-[11px] text-slate-500 font-mono mt-1">ISBN: ${esc(l.isbn)}</p>
+                <span class="inline-block mt-2 text-[11px] px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                  ${l.copias_disponibles} de ${l.copias_totales} disp.
+                </span>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
+              <span class="text-xs text-emerald-400 font-medium">Disponible</span>
+              <button onclick="prestarLibro(${l.id})"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition">
+                Solicitar Préstamo
+              </button>
+            </div>
           </div>
-          <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
-            <span class="text-xs text-emerald-400 font-medium">Disponible</span>
-            <button onclick="prestarLibro(${l.id})"
-              class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition">
-              Solicitar Préstamo
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function prestarLibro(libroId) {
@@ -336,18 +612,78 @@
       }
     }
 
+    // --- INTEGRACIÓN OPEN LIBRARY POR ISBN ---
+    function actualizarPreviewPortada(modo) {
+      const urlInput = document.getElementById(modo === 'crear' ? 'libro-portada' : 'edit-libro-portada');
+      const box = document.getElementById(`${modo}-portada-preview`);
+      const img = document.getElementById(`${modo}-portada-img`);
+      const txt = document.getElementById(`${modo}-portada-texto`);
+      const url = urlInput.value.trim();
+
+      if (url) {
+        img.src = url;
+        txt.textContent = url;
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    async function buscarOpenLibrary(modo) {
+      const isbnEl = document.getElementById(modo === 'crear' ? 'libro-isbn' : 'edit-libro-isbn');
+      const tituloEl = document.getElementById(modo === 'crear' ? 'libro-titulo' : 'edit-libro-titulo');
+      const autorEl = document.getElementById(modo === 'crear' ? 'libro-autor' : 'edit-libro-autor');
+      const portadaEl = document.getElementById(modo === 'crear' ? 'libro-portada' : 'edit-libro-portada');
+
+      const isbn = limpiarIsbn(isbnEl.value);
+      if (!isbn) {
+        mostrarToast('Ingresa un ISBN válido primero.', false);
+        return;
+      }
+      isbnEl.value = isbn;
+
+      try {
+        mostrarToast('Consultando Open Library...');
+        const res = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+        const json = await res.json();
+        const info = json[`ISBN:${isbn}`];
+        const coverFallback = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+
+        if (info) {
+          if (info.title) tituloEl.value = info.title;
+          if (info.authors && info.authors.length > 0) {
+            autorEl.value = info.authors.map(a => a.name).join(', ');
+          }
+          portadaEl.value = (info.cover && (info.cover.large || info.cover.medium || info.cover.small)) || coverFallback;
+          actualizarPreviewPortada(modo);
+          mostrarToast('Datos y portada obtenidos desde Open Library.');
+        } else {
+          portadaEl.value = coverFallback;
+          actualizarPreviewPortada(modo);
+          mostrarToast('Se asignó la URL de portada por ISBN; completa título/autor si faltan.');
+        }
+      } catch (err) {
+        mostrarToast('No se pudo conectar con Open Library.', false);
+      }
+    }
+
     async function crearLibro(e) {
       e.preventDefault();
+      const isbn = limpiarIsbn(document.getElementById('libro-isbn').value);
+      const portada = document.getElementById('libro-portada').value.trim() || `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
       const payload = {
         titulo: document.getElementById('libro-titulo').value,
         autor: document.getElementById('libro-autor').value,
-        isbn: document.getElementById('libro-isbn').value,
-        copias_totales: Number(document.getElementById('libro-copias').value)
+        isbn,
+        copias_totales: Number(document.getElementById('libro-copias').value),
+        portada_url: portada
       };
       const { ok, data } = await api('/api/libros/', { method: 'POST', body: JSON.stringify(payload) });
       if (ok) {
         mostrarToast('Libro registrado correctamente.');
         e.target.reset();
+        document.getElementById('crear-portada-preview').classList.add('hidden');
+        cargarAdminDatos();
       } else {
         mostrarToast(JSON.stringify(data), false);
       }
@@ -365,11 +701,216 @@
       if (ok) {
         mostrarToast('Usuario creado correctamente.');
         e.target.reset();
+        cargarAdminDatos();
       } else {
         mostrarToast(JSON.stringify(data), false);
       }
     }
 
+    // --- GESTIÓN Y EDICIÓN ADMIN (LIBROS Y USUARIOS) ---
+    async function cargarAdminDatos() {
+      const [resLibros, resUsuarios] = await Promise.all([
+        api('/api/libros/?todos=1'),
+        api('/api/usuarios/')
+      ]);
+
+      if (resLibros.ok) {
+        adminLibrosCache = resLibros.data;
+        renderizarAdminLibros();
+      }
+      if (resUsuarios.ok) {
+        adminUsuariosCache = resUsuarios.data;
+        renderizarAdminUsuarios();
+      }
+    }
+
+    function renderizarAdminLibros() {
+      const box = document.getElementById('admin-libros-lista');
+      if (adminLibrosCache.length === 0) {
+        box.innerHTML = `<p class="text-xs text-slate-400">No hay libros registrados.</p>`;
+        return;
+      }
+
+      box.innerHTML = `
+        <table class="w-full text-left text-xs">
+          <thead class="border-b border-slate-800 text-slate-400 uppercase">
+            <tr>
+              <th class="p-2">Portada</th>
+              <th class="p-2">Título / Autor</th>
+              <th class="p-2">ISBN</th>
+              <th class="p-2">Copias</th>
+              <th class="p-2">Estado</th>
+              <th class="p-2 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${adminLibrosCache.map(l => `
+              <tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                <td class="p-2">
+                  <img src="${esc(urlPortadaOpenLibrary(l))}" alt=""
+                    onload="if(this.naturalWidth<=1){this.style.visibility='hidden';}"
+                    onerror="this.style.visibility='hidden';"
+                    class="w-8 h-11 object-cover rounded border border-slate-700 bg-slate-950">
+                </td>
+                <td class="p-2">
+                  <p class="font-semibold text-white">${esc(l.titulo)}</p>
+                  <p class="text-slate-400">${esc(l.autor)}</p>
+                </td>
+                <td class="p-2 font-mono text-slate-300">${esc(l.isbn)}</td>
+                <td class="p-2 font-mono">${l.copias_disponibles} / ${l.copias_totales}</td>
+                <td class="p-2">
+                  <span class="px-2 py-0.5 rounded text-[11px] ${l.activo ? 'bg-emerald-950 text-emerald-300' : 'bg-rose-950 text-rose-300'}">
+                    ${l.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td>
+                <td class="p-2 text-right">
+                  <button onclick="abrirModalLibro(${l.id})"
+                    class="bg-slate-800 hover:bg-emerald-700 text-white px-3 py-1 rounded border border-slate-700">
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderizarAdminUsuarios() {
+      const box = document.getElementById('admin-usuarios-lista');
+      if (adminUsuariosCache.length === 0) {
+        box.innerHTML = `<p class="text-xs text-slate-400">No hay usuarios registrados.</p>`;
+        return;
+      }
+
+      box.innerHTML = `
+        <table class="w-full text-left text-xs">
+          <thead class="border-b border-slate-800 text-slate-400 uppercase">
+            <tr>
+              <th class="p-2">ID</th>
+              <th class="p-2">Nombre</th>
+              <th class="p-2">Correo</th>
+              <th class="p-2">Rol</th>
+              <th class="p-2">Estado</th>
+              <th class="p-2 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${adminUsuariosCache.map(u => `
+              <tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                <td class="p-2 font-mono text-slate-400">${u.id}</td>
+                <td class="p-2 font-semibold text-white">${esc(u.nombre)}</td>
+                <td class="p-2 font-mono text-slate-300">${esc(u.email)}</td>
+                <td class="p-2">
+                  <span class="px-2 py-0.5 rounded text-[11px] ${u.rol === 'admin' ? 'bg-amber-950 text-amber-300' : 'bg-cyan-950 text-cyan-300'}">
+                    ${esc(u.rol)}
+                  </span>
+                </td>
+                <td class="p-2">
+                  <span class="px-2 py-0.5 rounded text-[11px] ${u.activo ? 'bg-emerald-950 text-emerald-300' : 'bg-rose-950 text-rose-300'}">
+                    ${u.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td>
+                <td class="p-2 text-right">
+                  <button onclick="abrirModalUsuario(${u.id})"
+                    class="bg-slate-800 hover:bg-cyan-700 text-white px-3 py-1 rounded border border-slate-700">
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function abrirModalLibro(id) {
+      const l = adminLibrosCache.find(x => x.id === id);
+      if (!l) return;
+      document.getElementById('edit-libro-id').value = l.id;
+      document.getElementById('edit-libro-isbn').value = l.isbn;
+      document.getElementById('edit-libro-titulo').value = l.titulo;
+      document.getElementById('edit-libro-autor').value = l.autor;
+      document.getElementById('edit-libro-totales').value = l.copias_totales;
+      document.getElementById('edit-libro-disponibles').value = l.copias_disponibles;
+      document.getElementById('edit-libro-portada').value = urlPortadaOpenLibrary(l);
+      document.getElementById('edit-libro-activo').checked = Boolean(l.activo);
+      actualizarPreviewPortada('editar');
+      document.getElementById('modal-libro').classList.remove('hidden');
+    }
+
+    async function guardarEdicionLibro(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-libro-id').value;
+      const payload = {
+        isbn: limpiarIsbn(document.getElementById('edit-libro-isbn').value),
+        titulo: document.getElementById('edit-libro-titulo').value,
+        autor: document.getElementById('edit-libro-autor').value,
+        copias_totales: Number(document.getElementById('edit-libro-totales').value),
+        copias_disponibles: Number(document.getElementById('edit-libro-disponibles').value),
+        portada_url: document.getElementById('edit-libro-portada').value.trim(),
+        activo: document.getElementById('edit-libro-activo').checked
+      };
+
+      const { ok, data } = await api(`/api/libros/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+
+      if (ok) {
+        cerrarModal('modal-libro');
+        mostrarToast('Libro actualizado correctamente.');
+        cargarAdminDatos();
+      } else {
+        mostrarToast(data.error || JSON.stringify(data), false);
+      }
+    }
+
+    function abrirModalUsuario(id) {
+      const u = adminUsuariosCache.find(x => x.id === id);
+      if (!u) return;
+      document.getElementById('edit-usr-id').value = u.id;
+      document.getElementById('edit-usr-nombre').value = u.nombre;
+      document.getElementById('edit-usr-email').value = u.email;
+      document.getElementById('edit-usr-rol').value = u.rol;
+      document.getElementById('edit-usr-password').value = '';
+      document.getElementById('edit-usr-activo').checked = Boolean(u.activo);
+      document.getElementById('modal-usuario').classList.remove('hidden');
+    }
+
+    async function guardarEdicionUsuario(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-usr-id').value;
+      const payload = {
+        nombre: document.getElementById('edit-usr-nombre').value,
+        email: document.getElementById('edit-usr-email').value,
+        rol: document.getElementById('edit-usr-rol').value,
+        activo: document.getElementById('edit-usr-activo').checked
+      };
+      const nuevaPass = document.getElementById('edit-usr-password').value;
+      if (nuevaPass.trim()) {
+        payload.password = nuevaPass;
+      }
+
+      const { ok, data } = await api(`/api/usuarios/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+
+      if (ok) {
+        cerrarModal('modal-usuario');
+        mostrarToast('Usuario actualizado correctamente.');
+        cargarAdminDatos();
+      } else {
+        mostrarToast(data.error || JSON.stringify(data), false);
+      }
+    }
+
+    function cerrarModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // --- INSPECTOR POSTGRESQL ---
     async function cargarInspector() {
       const { ok, data } = await api('/api/sistema/tablas/');
       if (!ok) {

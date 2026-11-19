@@ -1,0 +1,208 @@
+[
+{
+  "model": "app.usuario",
+  "pk": 1,
+  "fields": {
+    "nombre": "Administrador",
+    "email": "admin@biblioteca.local",
+    "password": "pbkdf2_sha256$600000$mbOvWsl7CCpcQuaVuODtRT$P766029rTwAEXBEGiw/RPTsvIX7lVP0jOTMvBx4ENc0=",
+    "rol": "admin",
+    "activo": true,
+    "creado_en": "2026-11-17T03:41:27.644Z"
+  }
+},
+{
+  "model": "app.usuario",
+  "pk": 2,
+  "fields": {
+    "nombre": "Ana Hernandez",
+    "email": "anahdz@gmail.com",
+    "password": "pbkdf2_sha256$600000$LLNxDOzbm8hLdC4onxLqyW$ujR4AjaQcs975oVZfatPpFhvVpIK3bKnMAVi2mM/N2k=",
+    "rol": "lector",
+    "activo": true,
+    "creado_en": "2026-11-17T03:41:28.389Z"
+  }
+},
+{
+  "model": "app.usuario",
+  "pk": 3,
+  "fields": {
+    "nombre": "Saúl González Tonatiuh",
+    "email": "saulgo@gmail.com",
+    "password": "pbkdf2_sha256$600000$3BvQ0i0p8XCY8YZQenqdAu$UT5b5viDVDXFtkMX1LiL8BN9MoaIOb2m8gt2bp5Up0w=",
+    "rol": "lector",
+    "activo": true,
+    "creado_en": "2026-11-17T07:18:56.558Z"
+  }
+},
+{
+  "model": "app.usuario",
+  "pk": 4,
+  "fields": {
+    "nombre": "Pedro Campos Torres",
+    "email": "pedroct@gmail.com",
+    "password": "pbkdf2_sha256$600000$Qpi4IdGhWxTjFDMOdfcNr2$IZf0VRmpGfDGr20hnhWiZdkGl2E/ZFUDharyqVxOCo4=",
+    "rol": "lector",
+    "activo": true,
+    "creado_en": "2026-11-17T07:50:22.282Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 1,
+  "fields": {
+    "titulo": "Clean Code",
+    "autor": "Robert C. Martin",
+    "isbn": "9780132350884",
+    "copias_totales": 5,
+    "copias_disponibles": 4,
+    "portada_url": null,
+    "activo": true,
+    "creado_en": "2026-11-17T03:41:29.057Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 2,
+  "fields": {
+    "titulo": "La Náusea",
+    "autor": "Jean-Paul Sartre",
+    "isbn": "9780141185491",
+    "copias_totales": 5,
+    "copias_disponibles": 5,
+    "portada_url": null,
+    "activo": true,
+    "creado_en": "2026-11-17T07:15:03.226Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 3,
+  "fields": {
+    "titulo": "No Longer Human",
+    "autor": "Osamu Dazai",
+    "isbn": "9780811204811",
+    "copias_totales": 10,
+    "copias_disponibles": 9,
+    "portada_url": null,
+    "activo": true,
+    "creado_en": "2026-11-17T07:16:19.485Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 4,
+  "fields": {
+    "titulo": "El Mito de Sísifo",
+    "autor": "Albert Camus",
+    "isbn": "9786073826334",
+    "copias_totales": 1,
+    "copias_disponibles": 0,
+    "portada_url": null,
+    "activo": true,
+    "creado_en": "2026-11-17T07:20:22.308Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 5,
+  "fields": {
+    "titulo": "Rayuela",
+    "autor": "Julio Cortázar",
+    "isbn": "9788420437484",
+    "copias_totales": 1,
+    "copias_disponibles": 0,
+    "portada_url": "https://covers.openlibrary.org/b/id/9255220-L.jpg",
+    "activo": true,
+    "creado_en": "2026-11-17T07:45:32.196Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 6,
+  "fields": {
+    "titulo": "1984",
+    "autor": "George Orwell",
+    "isbn": "9780451524935",
+    "copias_totales": 3,
+    "copias_disponibles": 3,
+    "portada_url": "https://covers.openlibrary.org/b/id/15257452-L.jpg",
+    "activo": true,
+    "creado_en": "2026-11-17T08:37:21.384Z"
+  }
+},
+{
+  "model": "app.libro",
+  "pk": 7,
+  "fields": {
+    "titulo": "Crónica de una muerte anunciada",
+    "autor": "Gabriel García Márquez",
+    "isbn": "9786070729560",
+    "copias_totales": 5,
+    "copias_disponibles": 5,
+    "portada_url": "https://covers.openlibrary.org/b/id/15137197-L.jpg",
+    "activo": true,
+    "creado_en": "2026-11-17T09:52:39.177Z"
+  }
+},
+{
+  "model": "app.prestamo",
+  "pk": 1,
+  "fields": {
+    "libro": 5,
+    "usuario": 2,
+    "fecha_prestamo": "2026-11-17T07:47:20.265Z",
+    "fecha_limite": "2026-11-24T07:47:20.264Z",
+    "fecha_devolucion": null,
+    "estado": "activo"
+  }
+},
+{
+  "model": "app.prestamo",
+  "pk": 2,
+  "fields": {
+    "libro": 3,
+    "usuario": 3,
+    "fecha_prestamo": "2026-11-17T07:48:52.378Z",
+    "fecha_limite": "2026-11-24T07:48:52.378Z",
+    "fecha_devolucion": "2026-11-17T08:40:30.522Z",
+    "estado": "devuelto"
+  }
+},
+{
+  "model": "app.prestamo",
+  "pk": 3,
+  "fields": {
+    "libro": 3,
+    "usuario": 4,
+    "fecha_prestamo": "2026-11-17T07:50:27.309Z",
+    "fecha_limite": "2026-11-24T07:50:27.309Z",
+    "fecha_devolucion": null,
+    "estado": "activo"
+  }
+},
+{
+  "model": "app.prestamo",
+  "pk": 4,
+  "fields": {
+    "libro": 4,
+    "usuario": 4,
+    "fecha_prestamo": "2026-11-17T07:50:32.793Z",
+    "fecha_limite": "2026-11-24T07:50:32.793Z",
+    "fecha_devolucion": null,
+    "estado": "activo"
+  }
+},
+{
+  "model": "app.prestamo",
+  "pk": 5,
+  "fields": {
+    "libro": 1,
+    "usuario": 4,
+    "fecha_prestamo": "2026-11-17T09:54:39.134Z",
+    "fecha_limite": "2026-11-24T09:54:39.133Z",
+    "fecha_devolucion": null,
+    "estado": "activo"
+  }
+}
+]

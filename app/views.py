@@ -23,7 +23,7 @@ def index_view(request):
     return render(request, 'app/index.html')
 
 
-# 2. Autenticación (Login, Sesión actual y Logout)
+# 2. Autenticación, Registro Público, Sesión actual y Logout
 @api_view(['POST'])
 def login_view(request):
     email = request.data.get('email', '').strip().lower()
@@ -42,9 +42,53 @@ def login_view(request):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-    # Guardamos el ID en la sesión del servidor (cookie segura HttpOnly)
     request.session['usuario_id'] = usuario.id
     return Response({'ok': True, 'user': UsuarioSerializer(usuario).data})
+
+
+@api_view(['POST'])
+def register_view(request):
+    nombre = request.data.get('nombre', '').strip()
+    email = request.data.get('email', '').strip().lower()
+    password = request.data.get('password', '')
+
+    if not nombre or not email or not password:
+        return Response(
+            {'ok': False, 'error': 'Completa tu nombre, correo y contraseña.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if len(password) < 4:
+        return Response(
+            {'ok': False, 'error': 'La contraseña debe tener al menos 4 caracteres.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if Usuario.objects.filter(email=email).exists():
+        return Response(
+            {'ok': False, 'error': 'Este correo ya está registrado.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # El registro público siempre crea cuentas con rol='lector' y activo=True
+    serializer = UsuarioSerializer(data={
+        'nombre': nombre,
+        'email': email,
+        'password': password,
+        'rol': 'lector',
+        'activo': True,
+    })
+    if serializer.is_valid():
+        usuario = serializer.save()
+        request.session['usuario_id'] = usuario.id
+        return Response(
+            {'ok': True, 'user': UsuarioSerializer(usuario).data},
+            status=status.HTTP_201_CREATED
+        )
+    return Response(
+        {'ok': False, 'error': 'Datos de registro inválidos.', 'detalles': serializer.errors},
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 @api_view(['POST'])
@@ -81,7 +125,36 @@ def usuarios_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 4. Catálogo y Registro de Libros
+@api_view(['PATCH'])
+def usuario_detalle_view(request, pk):
+    actual = _usuario_actual(request)
+    if not actual or actual.rol != 'admin':
+        return Response({'error': 'Acceso exclusivo para administradores.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    data = request.data.copy()
+    if 'email' in data:
+        data['email'] = data['email'].strip().lower()
+
+    if usuario.id == actual.id:
+        if data.get('activo') is False or (data.get('rol') and data.get('rol') != 'admin'):
+            return Response(
+                {'error': 'No puedes desactivar o quitar el rol admin de tu propia cuenta.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    serializer = UsuarioSerializer(usuario, data=data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 4. Catálogo, Registro y Edición de Libros
 @api_view(['GET', 'POST'])
 def libros_view(request):
     actual = _usuario_actual(request)
@@ -89,11 +162,8 @@ def libros_view(request):
         return Response({'error': 'Debes iniciar sesión.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     if request.method == 'GET':
-        # Por defecto solo devolvemos libros con al menos 1 copia disponible
         incluir_todos = request.query_params.get('todos') == '1' and actual.rol == 'admin'
-        qs = Libro.objects.filter(activo=True)
-        if not incluir_todos:
-            qs = qs.filter(copias_disponibles__gt=0)
+        qs = Libro.objects.all() if incluir_todos else Libro.objects.filter(activo=True, copias_disponibles__gt=0)
         return Response(LibroSerializer(qs.order_by('id'), many=True).data)
 
     if actual.rol != 'admin':
@@ -106,7 +176,25 @@ def libros_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 5. Préstamos con Transacción Atómica (Evita condiciones de carrera)
+@api_view(['PATCH'])
+def libro_detalle_view(request, pk):
+    actual = _usuario_actual(request)
+    if not actual or actual.rol != 'admin':
+        return Response({'error': 'Solo los administradores pueden editar libros.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        libro = Libro.objects.get(pk=pk)
+    except Libro.DoesNotExist:
+        return Response({'error': 'Libro no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = LibroSerializer(libro, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 5. Préstamos con Transacción Atómica
 @api_view(['GET', 'POST'])
 def prestamos_view(request):
     actual = _usuario_actual(request)
@@ -127,7 +215,6 @@ def prestamos_view(request):
 
     try:
         with transaction.atomic():
-            # Bloqueo de fila en PostgreSQL hasta terminar la transacción
             libro = Libro.objects.select_for_update().get(id=libro_id, activo=True)
             if libro.copias_disponibles <= 0:
                 return Response(
@@ -188,7 +275,7 @@ def inspector_tablas_view(request):
         return Response({'error': 'Acceso exclusivo para administradores.'}, status=status.HTTP_403_FORBIDDEN)
 
     usuarios = list(Usuario.objects.order_by('id').values('id', 'nombre', 'email', 'rol', 'activo'))
-    libros = list(Libro.objects.order_by('id').values('id', 'titulo', 'autor', 'isbn', 'copias_totales', 'copias_disponibles', 'activo'))
+    libros = list(Libro.objects.order_by('id').values('id', 'titulo', 'autor', 'isbn', 'copias_totales', 'copias_disponibles', 'portada_url', 'activo'))
     prestamos = list(Prestamo.objects.order_by('id').values('id', 'libro_id', 'usuario_id', 'fecha_prestamo', 'fecha_limite', 'fecha_devolucion', 'estado'))
 
     return Response({
